@@ -1,6 +1,11 @@
+use std::env;
+
 mod args;
 
 fn main() {
-    let args: Vec<String> = args::read_args();
-    dbg!(args);
+    let filename: String = match args::validate_args(&env::args().collect()) {
+        Ok(x) => x,
+        Err(err) => panic!("{}", err),
+    };
+    println!("Filename {}", filename);
 }
