@@ -30,7 +30,5 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Format check
-        uses: actions/checkout@v2
-        uses: actions-rs/toolchain@v1
-        command: cargo make format-check
+      - name: Run checks
+        run: cargo make format-check
