@@ -1,0 +1,37 @@
+[tasks.check]
+description = "Run check in workspace project"
+command = "cargo"
+args = ["check", "--all-features", "--workspace"]
+
+[tasks.fmt-check]
+description = "Runs the cargo rustfmt plugin during CI."
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+[tasks.clippy-check]
+description = "Runs clippy without dependencies."
+command = "cargo"
+args = ["clippy", "--", "-D", "warnings"]
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clippy]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["clippy"]
+
+[tasks.format-check]
+dependencies = [
+    "fmt-check",
+    "clippy-check"
+]
+
+[tasks.format-code]
+dependencies = [
+    "format",
+    "clippy",
+]
+

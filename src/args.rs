@@ -5,7 +5,7 @@ pub fn read_args() -> Vec<String> {
     let args: Vec<String> = env::args().collect();
 
     match validate_args(&args) {
-        Ok(result) => args,
+        Ok(_) => args,
         Err(message) => panic!("{}", message),
     }
 }
