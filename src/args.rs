@@ -2,14 +2,7 @@ use std::path::Path;
 
 use regex::Regex;
 
-pub fn validate_args(args: &Vec<String>) -> Result<String, &str> {
-    match apply_validation(args) {
-        Ok(_) => Ok(args[1].clone()),
-        Err(message) => Err(message),
-    }
-}
-
-fn apply_validation(args: &Vec<String>) -> Result<bool, &str> {
+pub fn validate_args(args: &Vec<String>) -> Result<&String, &str> {
     // Validate number of arguments
     match args.len() {
         1 => return Err("Must pass at least one file to format"),
@@ -26,7 +19,7 @@ fn apply_validation(args: &Vec<String>) -> Result<bool, &str> {
 
     // Check the JSON file exist
     match Path::new(&args[1]).exists() {
-        true => Ok(true),
+        true => Ok(&args[1]),
         false => Err("The file doesn't exist"),
     }
 }
@@ -56,7 +49,7 @@ mod test {
 
         let valid_arg: Vec<String> = vec!["binary".to_owned(), "filename.json".to_owned()];
         let mut _file = fs::File::create(&valid_arg[1]);
-        assert_eq!(validate_args(&valid_arg), Ok("filename.json".to_owned()));
+        assert_eq!(validate_args(&valid_arg), Ok(&"filename.json".to_owned()));
         fs::remove_file(&valid_arg[1]).unwrap();
     }
 }
