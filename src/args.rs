@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use regex::Regex;
 
 pub fn validate_args(args: &Vec<String>) -> Result<String, &str> {
@@ -15,18 +17,24 @@ fn apply_validation(args: &Vec<String>) -> Result<bool, &str> {
         _ => return Err("You shall only pass one file"),
     };
 
-    // Validate the argument is a file
-    let regex = Regex::new(r"\w+\.\w+").unwrap();
+    // Validate the argument is a JSON file
+    let regex = Regex::new(r"\w+\.json").unwrap();
     match regex.is_match(&args[1]) {
         true => (),
-        false => return Err("The argument is not a file"),
+        false => return Err("The argument is not a JSON file"),
     };
 
-    Ok(true)
+    // Check the JSON file exist
+    match Path::new(&args[1]).exists() {
+        true => Ok(true),
+        false => Err("The file doesn't exist"),
+    }
 }
 
 #[cfg(test)]
 mod test {
+    use std::fs;
+
     use crate::args::validate_args;
 
     #[test]
@@ -38,13 +46,17 @@ mod test {
             Err("You shall only pass one file")
         );
 
-        let argument_not_a_file: Vec<String> = vec!["binary".to_owned(), "arg1".to_owned()];
+        let argument_not_a_file: Vec<String> = vec!["binary".to_owned(), "filename.txt".to_owned()];
+        let mut _file = fs::File::create(&argument_not_a_file[1]);
         assert_eq!(
             validate_args(&argument_not_a_file),
-            Err("The argument is not a file")
+            Err("The argument is not a JSON file")
         );
+        fs::remove_file(&argument_not_a_file[1]).unwrap();
 
-        let valid_arg: Vec<String> = vec!["binary".to_owned(), "filename.txt".to_owned()];
-        assert_eq!(validate_args(&valid_arg), Ok("filename.txt".to_owned()));
+        let valid_arg: Vec<String> = vec!["binary".to_owned(), "filename.json".to_owned()];
+        let mut _file = fs::File::create(&valid_arg[1]);
+        assert_eq!(validate_args(&valid_arg), Ok("filename.json".to_owned()));
+        fs::remove_file(&valid_arg[1]).unwrap();
     }
 }
