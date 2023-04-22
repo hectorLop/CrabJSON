@@ -35,3 +35,13 @@ dependencies = [
     "clippy",
 ]
 
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.check-ci]
+dependencies = [
+    "format-check",
+    "test",
+]
+
