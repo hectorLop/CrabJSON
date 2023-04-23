@@ -11,8 +11,9 @@ fn main() {
     println!("Filename {}", filename);
 
     let content = fs::read_to_string(filename).expect("Failed to read the JSON file");
+    let clean_content = content.replace([' ', '\n', '\t'], "");
 
-    match check_validity::is_json_valid(&content) {
+    match check_validity::is_json_valid(&clean_content) {
         true => (),
         false => panic!("Invalid JSON"),
     }
