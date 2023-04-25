@@ -1,6 +1,7 @@
 pub struct JSONValidator {
     clean_spaces: bool,
     validate_curly_braces: bool,
+    validate_fields_format: bool,
 }
 
 impl JSONValidator {
@@ -17,6 +18,12 @@ impl JSONValidator {
             }
         }
 
+        if self.validate_fields_format {
+            if let false = self.validate_fields_format(&characters) {
+                return Err("Invalid JSON format");
+            }
+        }
+
         Ok(content)
     }
 
@@ -27,12 +34,51 @@ impl JSONValidator {
     fn validate_curly_braces(&self, characters: &[char]) -> bool {
         !(characters[0] == '{' && characters.last() == Some(&'}'))
     }
+
+    fn validate_fields_format(&self, characters: &[char]) -> bool {
+        for (index, character) in characters.iter().enumerate() {
+            if character == &'"' {
+                if let Err(message) = self.field_validity(characters, index) {
+                    print!("{}", message);
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    fn field_validity(&self, characters: &[char], index: usize) -> Result<(), String> {
+        for (i, _element) in characters.iter().enumerate().skip(index) {
+            if !characters[i].is_alphabetic() && characters[i] == '"' && characters[i + 1] == ':' {
+                return Ok(());
+            };
+            //if !characters[i].is_alphabetic() && characters[i] != '"' {
+            //    return Err(format!(
+            //        "Invalid character: {} in position {}",
+            //        characters[i], i
+            //    ));
+            //} else if !characters[i].is_alphabetic() && characters[i] != ':' {
+            //    if characters[i-1] != '"' {
+            //        return Err(format!(
+            //            "Invalid character: {} in position {}",
+            //            characters[i], i
+            //        ));
+            //    }
+            //}
+        }
+        Err(format!(
+            "Invalid character: {} in position {}",
+            characters[index], index
+        ))
+    }
 }
 
 #[derive(Default)]
 pub struct JSONValidatorBuilder {
     clean_spaces: bool,
     validate_curly_braces: bool,
+    validate_fields_format: bool,
 }
 
 impl JSONValidatorBuilder {
@@ -40,6 +86,7 @@ impl JSONValidatorBuilder {
         JSONValidatorBuilder {
             clean_spaces: false,
             validate_curly_braces: false,
+            validate_fields_format: false,
         }
     }
 
@@ -53,10 +100,16 @@ impl JSONValidatorBuilder {
         self
     }
 
+    pub fn validate_fields_format(mut self, value: bool) -> JSONValidatorBuilder {
+        self.validate_fields_format = value;
+        self
+    }
+
     pub fn build(self) -> JSONValidator {
         JSONValidator {
             clean_spaces: self.clean_spaces,
             validate_curly_braces: self.validate_curly_braces,
+            validate_fields_format: self.validate_fields_format,
         }
     }
 }
@@ -101,6 +154,22 @@ mod test {
         assert_eq!(
             validator.validate(valid_content),
             Ok("{\"field\": 2}".to_string())
+        );
+    }
+
+    #[test]
+    fn test_validate_fields_format() {
+        let validator = JSONValidatorBuilder::new()
+            .clean_spaces(true)
+            .validate_fields_format(true)
+            .build();
+        let bad_field = "{\"field: 2}".to_string();
+        assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
+
+        let good_field = "{\"field\": 2}".to_string();
+        assert_eq!(
+            validator.validate(good_field),
+            Ok("{\"field\":2}".to_string())
         );
     }
 }

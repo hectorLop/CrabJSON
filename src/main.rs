@@ -17,6 +17,7 @@ fn main() {
     let json_validator: JSONValidator = JSONValidatorBuilder::new()
         .clean_spaces(true)
         .validate_curly_braces(true)
+        .validate_fields_format(true)
         .build();
 
     let _clean_content = match json_validator.validate(content) {
