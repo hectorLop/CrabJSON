@@ -53,19 +53,6 @@ impl JSONValidator {
             if !characters[i].is_alphabetic() && characters[i] == '"' && characters[i + 1] == ':' {
                 return Ok(());
             };
-            //if !characters[i].is_alphabetic() && characters[i] != '"' {
-            //    return Err(format!(
-            //        "Invalid character: {} in position {}",
-            //        characters[i], i
-            //    ));
-            //} else if !characters[i].is_alphabetic() && characters[i] != ':' {
-            //    if characters[i-1] != '"' {
-            //        return Err(format!(
-            //            "Invalid character: {} in position {}",
-            //            characters[i], i
-            //        ));
-            //    }
-            //}
         }
         Err(format!(
             "Invalid character: {} in position {}",
@@ -163,8 +150,12 @@ mod test {
             .clean_spaces(true)
             .validate_fields_format(true)
             .build();
+
         let bad_field = "{\"field: 2}".to_string();
         assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
+
+        //let bad_field = "{field: 2}".to_string();
+        //assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
 
         let good_field = "{\"field\": 2}".to_string();
         assert_eq!(

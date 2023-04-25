@@ -1,8 +1,8 @@
 use std::{env, fs};
 
 mod args;
-//mod check_validity;
 mod content;
+mod symbols;
 
 use content::{JSONValidator, JSONValidatorBuilder};
 
@@ -24,10 +24,4 @@ fn main() {
         Ok(result) => result,
         Err(message) => panic!("{}", message),
     };
-    //let clean_content = content.replace([' ', '\n', '\t'], "");
-
-    //match check_validity::is_json_valid(&clean_content) {
-    //    true => (),
-    //    false => panic!("Invalid JSON"),
-    //}
 }
