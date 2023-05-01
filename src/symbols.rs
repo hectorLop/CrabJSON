@@ -23,6 +23,75 @@ impl From<char> for Symbol {
     }
 }
 
+impl Symbol {
+    pub fn open_brace_actions(characters: &[char], index: usize) -> Result<(), String> {
+        if index == 0 && characters[index + 1] == '"' {
+            return Ok(());
+        };
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
+    }
+
+    pub fn close_brace_actions(_characters: &[char], _index: usize) -> Result<(), String> {
+        Ok(())
+    }
+
+    pub fn double_quotation_marks_action(characters: &[char], index: usize) -> Result<(), String> {
+        if characters[index - 1] == '{' && characters[index + 1].is_alphanumeric() {
+            return Ok(());
+        }
+
+        if characters[index - 1] == ':' && characters[index + 1].is_alphanumeric() {
+            return Ok(());
+        }
+
+        if characters[index - 1].is_alphanumeric()
+            && [':', ']', '}', ':'].contains(&characters[index + 1])
+        {
+            return Ok(());
+        };
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
+    }
+
+    pub fn letter_actions(characters: &[char], index: usize) -> Result<(), String> {
+        if characters[index - 1] == '"'
+            && (characters[index + 1].is_alphanumeric() || characters[index + 1] == '"')
+        {
+            return Ok(());
+        }
+
+        if characters[index - 1].is_alphanumeric()
+            && (characters[index + 1].is_alphanumeric() || characters[index + 1] == '"')
+        {
+            return Ok(());
+        }
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
+    }
+
+    pub fn number_actions(_characters: &[char], _index: usize) -> Result<(), String> {
+        Ok(())
+    }
+
+    pub fn colon_actions(_characters: &[char], _index: usize) -> Result<(), String> {
+        Ok(())
+    }
+
+    pub fn unspecified_actions(_characters: &[char], _index: usize) -> Result<(), String> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::symbols::Symbol;

@@ -1,3 +1,5 @@
+use crate::symbols::Symbol;
+
 pub struct JSONValidator {
     clean_spaces: bool,
     validate_curly_braces: bool,
@@ -37,28 +39,40 @@ impl JSONValidator {
 
     fn validate_fields_format(&self, characters: &[char]) -> bool {
         for (index, character) in characters.iter().enumerate() {
-            if character == &'"' {
-                if let Err(message) = self.field_validity(characters, index) {
-                    print!("{}", message);
+            let result = match Symbol::from(*character) {
+                Symbol::OpenBrace(_c) => Symbol::open_brace_actions(characters, index),
+                Symbol::CloseBrace(_c) => Symbol::close_brace_actions(characters, index),
+                Symbol::DoubleQuotationMarks(_c) => {
+                    Symbol::double_quotation_marks_action(characters, index)
+                }
+                Symbol::Letter(_c) => Symbol::letter_actions(characters, index),
+                Symbol::Number(_c) => Symbol::number_actions(characters, index),
+                Symbol::Colon(_c) => Symbol::colon_actions(characters, index),
+                Symbol::Unspecified(_c) => Symbol::unspecified_actions(characters, index),
+            };
+            match result {
+                Ok(_) => (),
+                Err(e) => {
+                    println!("{}", e);
                     return false;
                 }
-            }
+            };
         }
 
         true
     }
 
-    fn field_validity(&self, characters: &[char], index: usize) -> Result<(), String> {
-        for (i, _element) in characters.iter().enumerate().skip(index) {
-            if !characters[i].is_alphabetic() && characters[i] == '"' && characters[i + 1] == ':' {
-                return Ok(());
-            };
-        }
-        Err(format!(
-            "Invalid character: {} in position {}",
-            characters[index], index
-        ))
-    }
+    //fn field_validity(&self, characters: &[char], index: usize) -> Result<(), String> {
+    //    for (i, _element) in characters.iter().enumerate().skip(index) {
+    //        if !characters[i].is_alphabetic() && characters[i] == '"' && characters[i + 1] == ':' {
+    //            return Ok(());
+    //        };
+    //    }
+    //    Err(format!(
+    //        "Invalid character: {} in position {}",
+    //        characters[index], index
+    //    ))
+    //}
 }
 
 #[derive(Default)]
