@@ -48,8 +48,12 @@ impl Symbol {
             return Ok(());
         }
 
+        if characters[index - 1] == ',' && characters[index + 1].is_alphanumeric() {
+            return Ok(());
+        }
+
         if characters[index - 1].is_alphanumeric()
-            && [':', ']', '}', ':'].contains(&characters[index + 1])
+            && [':', ']', '}', ':', ','].contains(&characters[index + 1])
         {
             return Ok(());
         };
@@ -79,8 +83,39 @@ impl Symbol {
         ));
     }
 
-    pub fn number_actions(_characters: &[char], _index: usize) -> Result<(), String> {
-        Ok(())
+    pub fn number_actions(characters: &[char], index: usize) -> Result<(), String> {
+        if characters[index - 1] == ':'
+            && (characters[index + 1].is_numeric()
+                || characters[index + 1] == ','
+                || characters[index + 1] == '}')
+        {
+            return Ok(());
+        }
+
+        if characters[index - 1].is_alphanumeric()
+            && (characters[index + 1].is_alphanumeric() || characters[index + 1] == '"')
+        {
+            return Ok(());
+        }
+
+        if characters[index - 1] == '"'
+            && (characters[index + 1].is_alphanumeric() || characters[index + 1] == '"')
+        {
+            return Ok(());
+        }
+
+        if characters[index - 1].is_numeric()
+            && (characters[index + 1].is_numeric()
+                || characters[index + 1] == ','
+                || characters[index + 1] == '}')
+        {
+            return Ok(());
+        }
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
     }
 
     pub fn colon_actions(_characters: &[char], _index: usize) -> Result<(), String> {

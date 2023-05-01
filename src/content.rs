@@ -153,16 +153,32 @@ mod test {
             .validate_fields_format(true)
             .build();
 
-        let bad_field = "{\"field: 2}".to_string();
-        assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
+        let bad_cases = [
+            "{\"field: 2}",
+            "{field: 2}",
+            "{\"field\":\"2}",
+            "{\"field\":fff2\"}",
+            "{\"3:2}",
+            "{3:2}",
+            "{\"field\":\"fff2\", \"field2\": 4f}",
+        ];
 
-        let bad_field = "{field: 2}".to_string();
-        assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
+        for case in bad_cases {
+            assert_eq!(
+                validator.validate(case.to_string()),
+                Err("Invalid JSON format")
+            );
+        }
 
-        let good_field = "{\"field\": 2}".to_string();
-        assert_eq!(
-            validator.validate(good_field),
-            Ok("{\"field\":2}".to_string())
-        );
+        let good_cases = [
+            "{\"field\":\"fff2\",\"field2\":\"4f\"}",
+            "{\"field\":3,\"field2\":3}",
+            "{\"field\":3,\"42\":3}",
+        ];
+
+        for case in good_cases {
+            println!("Testing: {}", case);
+            assert_eq!(validator.validate(case.to_string()), Ok(case.to_string()));
+        }
     }
 }
