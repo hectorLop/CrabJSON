@@ -61,18 +61,6 @@ impl JSONValidator {
 
         true
     }
-
-    //fn field_validity(&self, characters: &[char], index: usize) -> Result<(), String> {
-    //    for (i, _element) in characters.iter().enumerate().skip(index) {
-    //        if !characters[i].is_alphabetic() && characters[i] == '"' && characters[i + 1] == ':' {
-    //            return Ok(());
-    //        };
-    //    }
-    //    Err(format!(
-    //        "Invalid character: {} in position {}",
-    //        characters[index], index
-    //    ))
-    //}
 }
 
 #[derive(Default)]
@@ -168,8 +156,8 @@ mod test {
         let bad_field = "{\"field: 2}".to_string();
         assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
 
-        //let bad_field = "{field: 2}".to_string();
-        //assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
+        let bad_field = "{field: 2}".to_string();
+        assert_eq!(validator.validate(bad_field), Err("Invalid JSON format"));
 
         let good_field = "{\"field\": 2}".to_string();
         assert_eq!(
