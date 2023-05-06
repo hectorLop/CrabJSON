@@ -29,14 +29,32 @@ impl Symbol {
             return Ok(());
         };
 
+        if index != 0 && characters[index - 1] == ':' && characters[index + 1] == '"' {
+            return Ok(());
+        }
+
         return Err(format!(
             "Invalid {} at position {}",
             characters[index], index
         ));
     }
 
-    pub fn close_brace_actions(_characters: &[char], _index: usize) -> Result<(), String> {
-        Ok(())
+    pub fn close_brace_actions(characters: &[char], index: usize) -> Result<(), String> {
+        if (characters[index - 1] == '"' || characters[index - 1].is_numeric())
+            && index == characters.len() - 1
+        {
+            return Ok(());
+        }
+        if (characters[index - 1] == '"' || characters[index - 1].is_numeric())
+            && [']', '}', ','].contains(&characters[index + 1])
+        {
+            return Ok(());
+        }
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
     }
 
     pub fn double_quotation_marks_action(characters: &[char], index: usize) -> Result<(), String> {
@@ -118,8 +136,18 @@ impl Symbol {
         ));
     }
 
-    pub fn colon_actions(_characters: &[char], _index: usize) -> Result<(), String> {
-        Ok(())
+    pub fn colon_actions(characters: &[char], index: usize) -> Result<(), String> {
+        if characters[index - 1] == '"'
+            && (['{', '[', '"'].contains(&characters[index + 1])
+                || characters[index + 1].is_numeric())
+        {
+            return Ok(());
+        }
+
+        return Err(format!(
+            "Invalid {} at position {}",
+            characters[index], index
+        ));
     }
 
     pub fn unspecified_actions(_characters: &[char], _index: usize) -> Result<(), String> {

@@ -106,6 +106,7 @@ impl JSONValidatorBuilder {
 #[cfg(test)]
 mod test {
     use crate::content::JSONValidatorBuilder;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_clean_spaces() {
@@ -161,9 +162,12 @@ mod test {
             "{\"3:2}",
             "{3:2}",
             "{\"field\":\"fff2\", \"field2\": 4f}",
+            "{\"field\":\"fff2\", field2: 4}",
+            "{\"field\": {\"aaa\": 3, \"bbb\": {\"ccc\": 3}, \"ddd\": \"ff\"}}",
         ];
 
         for case in bad_cases {
+            println!("{}", case);
             assert_eq!(
                 validator.validate(case.to_string()),
                 Err("Invalid JSON format")
