@@ -7,10 +7,14 @@ pub struct JSONValidator {
 impl JSONValidator {
     pub fn validate(&self, mut content: String) -> Result<String, &str> {
         if self.clean_spaces {
-            content = self.clean_spaces(content);
+            content = content.replace([' ', '\n', '\t'], "");
         }
 
-        let characters: Vec<char> = content.chars().collect();
+        let characters: Vec<char> = content
+            //.replace("true", "t")
+            //.replace("false", "f")
+            .chars()
+            .collect();
 
         if self.validate_curly_braces {
             if let true = self.validate_curly_braces(&characters) {
@@ -34,16 +38,9 @@ impl JSONValidator {
         Ok(content)
     }
 
-    fn clean_spaces(&self, content: String) -> String {
-        content.replace([' ', '\n', '\t'], "")
-    }
-
     fn validate_curly_braces(&self, characters: &[char]) -> bool {
         !(characters[0] == '{' && characters.last() == Some(&'}'))
     }
-
-    // I can use the is_string flag to detect special behaviour. Besides
-    // using the stack can have more benefits for other symbols
 
     fn validate_format(&self, characters: &[char]) -> Result<bool, String> {
         let mut stack: Vec<char> = vec![characters[0]];
@@ -75,14 +72,11 @@ impl JSONValidator {
                                 characters[i], i
                             ));
                         }
-                    } else {
-                        println!("{}", i);
-                        if i == characters.len() - 1 {
-                            return Err(format!(
-                                "Invalid string => {} at position {}",
-                                characters[i], i
-                            ));
-                        }
+                    } else if i == characters.len() - 1 {
+                        return Err(format!(
+                            "Invalid string => {} at position {}",
+                            characters[i], i
+                        ));
                     }
                 }
                 ']' => {
@@ -109,6 +103,32 @@ impl JSONValidator {
                         }
                     }
                 }
+                't' | 'f' => {
+                    if !is_string {
+                        if i + 5 > characters.len() - 1 {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                        if !['[', ':'].contains(stack.last().unwrap()) {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                        if characters[i..i + 4].iter().collect::<String>() == "true" {
+                            i += 3;
+                        } else if characters[i..i + 5].iter().collect::<String>() == "false" {
+                            i += 4;
+                        } else {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    }
+                }
                 ':' => {
                     if !is_string {
                         stack.push(characters[i]);
@@ -124,6 +144,23 @@ impl JSONValidator {
                         // If we found a dot, and it isn't a string, then the
                         // top character on the stack bust be either [ or :
                         if !['[', ':'].contains(stack.last().unwrap()) {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    }
+                }
+                '-' => {
+                    // Check negative number
+                    if !is_string {
+                        if !['[', ':'].contains(stack.last().unwrap()) {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                        if !characters[i + 1].is_numeric() {
                             return Err(format!(
                                 "Invalid string => {} at position {}",
                                 characters[i], i
@@ -264,6 +301,8 @@ mod test {
             "{\"field\":3,\"42\":3}",
             "{\"field\":{\"aaa\":3,\"bbb\":{\"ccc\":3},\"ddd\":\"ff\"}}",
             "{\"field\":3,\"42\":3.43}",
+            "{\"field\":3,\"42\":-3.43}",
+            "{\"field\":true,\"42\":false}",
             "{\"field\":3,\"42\":\"3-43-43\"}",
         ];
 
