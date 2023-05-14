@@ -2,7 +2,6 @@ use std::{env, fs};
 
 mod args;
 mod content;
-mod symbols;
 
 use content::{JSONValidator, JSONValidatorBuilder};
 

@@ -1,5 +1,3 @@
-use crate::symbols::Symbol;
-
 pub struct JSONValidator {
     clean_spaces: bool,
     validate_curly_braces: bool,
@@ -21,9 +19,16 @@ impl JSONValidator {
         }
 
         if self.validate_fields_format {
-            if let false = self.validate_fields_format(&characters) {
-                return Err("Invalid JSON format");
-            }
+            //if let false = self.validate_fields_format(&characters) {
+            //    return Err("Invalid JSON format");
+            //}
+            match self.validate_format(&characters) {
+                Ok(_val) => {}
+                Err(err) => {
+                    println!("{}", err);
+                    return Err("Invalid JSON format");
+                }
+            };
         }
 
         Ok(content)
@@ -37,29 +42,107 @@ impl JSONValidator {
         !(characters[0] == '{' && characters.last() == Some(&'}'))
     }
 
-    fn validate_fields_format(&self, characters: &[char]) -> bool {
-        for (index, character) in characters.iter().enumerate() {
-            let result = match Symbol::from(*character) {
-                Symbol::OpenBrace(_c) => Symbol::open_brace_actions(characters, index),
-                Symbol::CloseBrace(_c) => Symbol::close_brace_actions(characters, index),
-                Symbol::DoubleQuotationMarks(_c) => {
-                    Symbol::double_quotation_marks_action(characters, index)
-                }
-                Symbol::Letter(_c) => Symbol::letter_actions(characters, index),
-                Symbol::Number(_c) => Symbol::number_actions(characters, index),
-                Symbol::Colon(_c) => Symbol::colon_actions(characters, index),
-                Symbol::Unspecified(_c) => Symbol::unspecified_actions(characters, index),
-            };
-            match result {
-                Ok(_) => (),
-                Err(e) => {
-                    println!("{}", e);
-                    return false;
-                }
-            };
-        }
+    // I can use the is_string flag to detect special behaviour. Besides
+    // using the stack can have more benefits for other symbols
 
-        true
+    fn validate_format(&self, characters: &[char]) -> Result<bool, String> {
+        let mut stack: Vec<char> = vec![characters[0]];
+        let mut i: usize = 1;
+        let mut is_string: bool = false;
+
+        while !stack.is_empty() {
+            match characters[i] {
+                '{' | '[' => stack.push(characters[i]),
+                '"' => {
+                    // Closer double quotes
+                    if stack.last().unwrap() == &'"' {
+                        stack.pop();
+                        is_string = false;
+                    } else {
+                        // String start
+                        stack.push(characters[i]);
+                        is_string = true;
+                    }
+                }
+                '}' => {
+                    if !is_string {
+                        if stack.last() == Some(&':') {
+                            stack.pop();
+                        }
+                        if stack.pop() != Some('{') {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    } else {
+                        println!("{}", i);
+                        if i == characters.len() - 1 {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    }
+                }
+                ']' => {
+                    if stack.pop() != Some('[') {
+                        return Err(format!(
+                            "Invalid string => {} at position {}",
+                            characters[i], i
+                        ));
+                    }
+                }
+                '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+                    // If we found a number, it has to meet a serie of requirements
+                    // if it isn't a string
+                    if !is_string {
+                        // If the top element in the stack is a :, then it's
+                        // ok to find a number. If the top element is a [ then
+                        // it's ok either. However, if they are not, then we have
+                        // a problem
+                        if !['[', ':'].contains(stack.last().unwrap()) {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    }
+                }
+                ':' => {
+                    if !is_string {
+                        stack.push(characters[i]);
+                    }
+                }
+                ',' => {
+                    if stack.last() == Some(&':') {
+                        stack.pop();
+                    }
+                }
+                '.' => {
+                    if !is_string {
+                        // If we found a dot, and it isn't a string, then the
+                        // top character on the stack bust be either [ or :
+                        if !['[', ':'].contains(stack.last().unwrap()) {
+                            return Err(format!(
+                                "Invalid string => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
+                    }
+                }
+                _ => {
+                    if !is_string {
+                        return Err(format!(
+                            "Invalid string => {} at position {}",
+                            characters[i], i
+                        ));
+                    }
+                }
+            };
+            i += 1;
+        }
+        Ok(true)
     }
 }
 
@@ -163,7 +246,8 @@ mod test {
             "{3:2}",
             "{\"field\":\"fff2\", \"field2\": 4f}",
             "{\"field\":\"fff2\", field2: 4}",
-            "{\"field\": {\"aaa\": 3, \"bbb\": {\"ccc\": 3}, \"ddd\": \"ff\"}}",
+            "{\"field\":\"fff2\", \"field2\": [3, 2, i]}",
+            "{\"field\":\"fff2\", \"field2\": [3, 2, i]}",
         ];
 
         for case in bad_cases {
@@ -178,6 +262,9 @@ mod test {
             "{\"field\":\"fff2\",\"field2\":\"4f\"}",
             "{\"field\":3,\"field2\":3}",
             "{\"field\":3,\"42\":3}",
+            "{\"field\":{\"aaa\":3,\"bbb\":{\"ccc\":3},\"ddd\":\"ff\"}}",
+            "{\"field\":3,\"42\":3.43}",
+            "{\"field\":3,\"42\":\"3-43-43\"}",
         ];
 
         for case in good_cases {
