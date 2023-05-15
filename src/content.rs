@@ -66,6 +66,16 @@ impl JSONValidator {
                         if stack.last() == Some(&':') {
                             stack.pop();
                         }
+                        if ![']', '"', '}'].contains(&characters[i - 1])
+                            && !characters[i - 1].is_numeric()
+                            && characters[i - 4..i].iter().collect::<String>() != "true"
+                            && characters[i - 5..i].iter().collect::<String>() != "false"
+                        {
+                            return Err(format!(
+                                "Invalid strUIUIUIUng => {} at position {}",
+                                characters[i], i
+                            ));
+                        }
                         if stack.pop() != Some('{') {
                             return Err(format!(
                                 "Invalid string => {} at position {}",
@@ -135,6 +145,12 @@ impl JSONValidator {
                     }
                 }
                 ',' => {
+                    if !is_string && !['[', ':', '{'].contains(stack.last().unwrap()) {
+                        return Err(format!(
+                            "Invalid string => {} at position {}",
+                            characters[i], i
+                        ));
+                    }
                     if stack.last() == Some(&':') {
                         stack.pop();
                     }
@@ -283,7 +299,9 @@ mod test {
             "{3:2}",
             "{\"field\":\"fff2\", \"field2\": 4f}",
             "{\"field\":\"fff2\", field2: 4}",
-            "{\"field\":\"fff2\", \"field2\": [3, 2, i]}",
+            "{\"field\":\"fff2\", \"field2\": {\"field\": 4,},}",
+            "{\"field\":\"fff2\", \"field2\": {}}",
+            "{\"field\":\"fff2\", \"field2\": [3, 2, i,]}",
             "{\"field\":\"fff2\", \"field2\": [3, 2, i]}",
         ];
 
