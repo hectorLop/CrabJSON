@@ -19,8 +19,7 @@ fn main() {
         .validate_fields_format(true)
         .build();
 
-    let _clean_content = match json_validator.validate(content) {
-        Ok(result) => result,
-        Err(message) => panic!("{}", message),
+    if let Err(message) = json_validator.validate(content) {
+        panic!("{}", message)
     };
 }

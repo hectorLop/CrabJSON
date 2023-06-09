@@ -5,16 +5,12 @@ pub struct JSONValidator {
 }
 
 impl JSONValidator {
-    pub fn validate(&self, mut content: String) -> Result<String, &str> {
+    pub fn validate(&self, mut content: String) -> Result<(), &str> {
         if self.clean_spaces {
             content = content.replace([' ', '\n', '\t'], "");
         }
 
-        let characters: Vec<char> = content
-            //.replace("true", "t")
-            //.replace("false", "f")
-            .chars()
-            .collect();
+        let characters: Vec<char> = content.chars().collect();
 
         if self.validate_curly_braces {
             if let true = self.validate_curly_braces(&characters) {
@@ -23,9 +19,6 @@ impl JSONValidator {
         }
 
         if self.validate_fields_format {
-            //if let false = self.validate_fields_format(&characters) {
-            //    return Err("Invalid JSON format");
-            //}
             match self.validate_format(&characters) {
                 Ok(_val) => {}
                 Err(err) => {
@@ -35,7 +28,7 @@ impl JSONValidator {
             };
         }
 
-        Ok(content)
+        Ok(())
     }
 
     fn validate_curly_braces(&self, characters: &[char]) -> bool {
@@ -245,14 +238,6 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_clean_spaces() {
-        let validator = JSONValidatorBuilder::new().clean_spaces(true).build();
-
-        let input1 = "Test\ninput\twith spaces".to_string();
-        assert_eq!(validator.validate(input1).unwrap(), "Testinputwithspaces")
-    }
-
-    #[test]
     fn test_validate_curly_braces() {
         let validator = JSONValidatorBuilder::new()
             .validate_curly_braces(true)
@@ -277,10 +262,7 @@ mod test {
         );
 
         let valid_content = "{\"field\": 2}".to_string();
-        assert_eq!(
-            validator.validate(valid_content),
-            Ok("{\"field\": 2}".to_string())
-        );
+        assert_eq!(validator.validate(valid_content), Ok(()));
     }
 
     #[test]
@@ -291,6 +273,8 @@ mod test {
             .build();
 
         let bad_cases = [
+            "{....}",
+            "{fefeff}",
             "{\"field: 2}",
             "{field: 2}",
             "{\"field\":\"2}",
@@ -326,7 +310,7 @@ mod test {
 
         for case in good_cases {
             println!("Testing: {}", case);
-            assert_eq!(validator.validate(case.to_string()), Ok(case.to_string()));
+            assert_eq!(validator.validate(case.to_string()), Ok(()));
         }
     }
 }
