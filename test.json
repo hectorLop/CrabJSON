@@ -1,5 +1,5 @@
 {
-	"random": "53",
+"random": "53",
 	"random float": "89764",
 	"bool": "false",
 	"date": "1999-05-02",
@@ -11,19 +11,16 @@
 	"country": "Cape Verde",
 	"countryCode": "FK",
 	"email uses current data": "Nita.Michella@gmail.com",
-	"email from expression": "Nita.Michella@yopmail.com",
-	"array": [
+"email from expression":"Nita.Michella@yopmail.com",
+"array": [
 		"Nyssa",
 		"Arlena",
 		"Rori",
 		"Marjie",
 		"Corina"
 	],
-	"array of objects": [
-		{
-			"index": "0",
-			"index start at 5": "5"
-		},
+	"array of objects": [{"index": "0",
+			"index start at 5": "5"},
 		{
 			"index": "1",
 			"index start at 5": "6"
@@ -33,7 +30,5 @@
 			"index start at 5": "7"
 		}
 	],
-	"Stacey": {
-		"age": "22"
-	}
+	"Stacey": {"age": "22"}
 }

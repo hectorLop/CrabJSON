@@ -1,0 +1,39 @@
+{
+	"random": "53",
+	"randomfloat": "89764",
+	"bool": "false",
+	"date": "1999-05-02",
+	"regEx": "hellooooooooooooooooooooooooooooooooooooooooooooooooooooootoyou",
+	"enum": "online",
+	"firstname": "Nita",
+	"lastname": "Michella",
+	"city": "St.Louis",
+	"country": "CapeVerde",
+	"countryCode": "FK",
+	"emailusescurrentdata": "Nita.Michella@gmail.com",
+	"emailfromexpression": "Nita.Michella@yopmail.com",
+	"array": [
+		"Nyssa",
+		"Arlena",
+		"Rori",
+		"Marjie",
+		"Corina"
+	],
+	"arrayofobjects": [
+		{
+			"index": "0",
+			"indexstartat5": "5"
+		},
+		{
+			"index": "1",
+			"indexstartat5": "6"
+		},
+		{
+			"index": "2",
+			"indexstartat5": "7"
+		}
+	],
+	"Stacey": {
+		"age": "22"
+	}
+}
