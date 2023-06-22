@@ -1,0 +1,39 @@
+{
+	"random": "89",
+	"randomfloat": "86.463",
+	"bool": "false",
+	"date": "1983-10-09",
+	"regEx": "hellooooooooooooooooooooooooooooooootoyou",
+	"enum": "generator",
+	"firstname": "Aili",
+	"lastname": "Colyer",
+	"city": "Helsinki",
+	"country": "Guatemala",
+	"countryCode": "KP",
+	"emailusescurrentdata": "Aili.Colyer@gmail.com",
+	"emailfromexpression": "Aili.Colyer@yopmail.com",
+	"array": [
+		"Ekaterina",
+		"Cristine",
+		"Catharine",
+		"Nannie",
+		"Judy"
+	],
+	"arrayofobjects": [
+		{
+			"index": "0",
+			"indexstartat5": "5"
+		},
+		{
+			"index": "1",
+			"indexstartat5": "6"
+		},
+		{
+			"index": "2",
+			"indexstartat5": "7"
+		}
+	],
+	"Georgetta": {
+		"age": "55"
+	}
+}
